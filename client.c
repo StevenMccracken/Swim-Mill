@@ -1,16 +1,15 @@
 //
-//  Test.c
+//  client.c
 //  
 //
 //  Created by Steven McCracken on 4/9/16.
 //
 //
 
-#include "Test.h"
+#include "client.h"
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
-#include <stdio.h>
 
 #define SHMSZ   27
 

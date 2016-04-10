@@ -1,14 +1,14 @@
 //
-//  Test.h
+//  client.h
 //  
 //
 //  Created by Steven McCracken on 4/9/16.
 //
 //
 
-#ifndef Test_h
-#define Test_h
+#ifndef client_h
+#define client_h
 
 #include <stdio.h>
 
-#endif /* Test_h */
+#endif /* client_h */
