@@ -26,7 +26,7 @@ main() {
         perror("shmget");
         exit(1);
     } else {
-        printf("ayy1");
+        //printf("ayy1");
     }
     
     // Attach segment to data space
@@ -34,7 +34,7 @@ main() {
         perror("shmat");
         exit(1);
     } else {
-        printf("ayy2");
+        //printf("ayy2");
     }
     
     // Put things into the memory
@@ -42,7 +42,15 @@ main() {
     
     for(c = 'a'; c <= 'z'; c++)
         *s++ = c;
+    *s++ = 'q';
     *s = NULL;
     
-    printf("ayy3");
+    //printf("ayy3");
+    // Wait until other process changes first char to *
+    while(*shm != '*') {
+        printf("Waiting...");
+        sleep(1);
+    }
+    printf("Client done");
+    exit(0);
 }
