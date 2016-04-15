@@ -6,25 +6,71 @@
 //
 //
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/ipc.h>
-#include <sys/shm.h>
-#include <sys/wait.h>
+#include "includes.h"
 
-#define SHMSZ 100
+void printWater();
+void configureWater();
+void createSharedMemory();
+const int timeLimit = 30;
 
 int main() {
     pid_t fish, pellet;
+    
+    createSharedMemory();
+    configureWater();
+    
+    if((fish = fork()) == 0) {
+        if((pellet = fork()) == 0) {
+            
+            // Run fish and pellet processes for timeLimit seconds
+            for(int seconds = 0; seconds < timeLimit; seconds++) {
+                printWater();
+                sleep(1);
+                //printf("%d seconds passed\n", (seconds+1));
+            }
+            kill(pellet, SIGUSR1);
+            
+            //kill(pellet, SIGKILL);
+            kill(fish, SIGKILL);
+            shmdt(water);
+        } else { // pellet
+            sleep(1);
+            static char *argv[] = {"","",NULL};
+            execv("/Users/stevenmccracken/Documents/GitHub/School/Swim-Mill/pellet", argv);
+        }
+    } else { // fish
+        static char *argv[] = {"","",NULL};
+        execv("/Users/stevenmccracken/Documents/GitHub/School/Swim-Mill/fish", argv);
+    }
+    
+    printf("Swim_mill done\n");
+    return 0;
+}
+
+void printWater() {
+    for(int i = 0; i < rows; i++) {
+        for(int j = 0; j < cols; j++)
+            printf("%c",(*water)[i][j]);
+        printf("\n");
+    }
+    printf("\n");
+}
+
+void configureWater() {
+    // Place "water" into memory
+    for(int i = 0; i < rows; i++) {
+        for(int j = 0; j < cols; j++)
+            (*water)[i][j] = '~';
+    }
+    // Place fish in middle of last row
+    (*water)[rows-1][cols/2] = '^';
+}
+
+void createSharedMemory() {
     int shmid;
     key_t key = 1738;
     char *shm;
-    char (*water)[10][10];
     
-    char c = 0x80;
-    printf("%c\n", c);
     // Create segment
     if((shmid = shmget(key, sizeof(water), IPC_CREAT | 0666)) < 0) {
         perror("shmget");
@@ -38,38 +84,4 @@ int main() {
         exit(1);
     } else
         printf("Attached segment to data space %p\n", water);
-    
-    // Put stuff into memory
-    for(int i = 0; i < 10; i++) {
-        for(int j = 0; j < 10; j++) {
-            (*water)[i][j] = '~';
-        }
-    }
-    (*water)[9][4] = '^';
-    
-    
-    if((fish = fork()) == 0) {
-        if((pellet = fork()) == 0) {
-            int seconds = 0;
-            while(seconds < 30) {
-                for(int i = 0; i < 10; i++) {
-                    for(int j = 0; j < 10; j++) {
-                        printf("%c",(*water)[i][j]);
-                    }
-                    printf("\n");
-                }
-                printf("\n");
-                sleep(1);
-                seconds++;
-            }
-        } else { // pellet
-            sleep(1);
-            static char *argv[] = {"","",NULL};
-            execv("/Users/stevenmccracken/Documents/GitHub/School/Swim-Mill/pellet", argv);
-        }
-    } else { // fish
-        static char *argv[] = {"","",NULL};
-        execv("/Users/stevenmccracken/Documents/GitHub/School/Swim-Mill/fish", argv);
-    }
-    return 0;
 }

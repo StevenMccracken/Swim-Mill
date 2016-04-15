@@ -6,49 +6,64 @@
 //
 //
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/ipc.h>
-#include <sys/shm.h>
+#include "includes.h"
 #include <time.h>
+#include <pthread.h>
 
-#define SHMSZ   27
+static void *child(int*);
+
+void catch(int signal) {
+    printf("got signal %d\n", signal);
+}
 
 int main() {
     srand(time(NULL));
-    int shmid;
-    key_t key = 1738;
-    char (*water)[10][10];
+    //signal(SIGUSR1, catch);
+    attachSharedMemory();
+    pthread_t threads[30];
     
-    // Locate segment
-    if((shmid = shmget(key, sizeof(water), 0666)) < 0) {
-        perror("shmget");
-        exit(1);
-    } else {
-        //printf("Pellet located segment %d\n", shmid);
+    kill(getpid(), SIGSTOP);
+    
+    for(int i = 0; i < 30; i++) {
+        // Sleeps for random interval between 1 and 2 seconds
+        int sleepTime = rand() % 2 + 1;
+        sleep(sleepTime);
+        
+        int xPos, yPos;
+        do {
+            xPos = rand()%8+1;
+            yPos = rand()%8+1;
+        }
+        while((*water)[xPos][yPos] == 'o');
+        
+        int position[2] = {xPos, yPos};
+        pthread_create(&threads[i], NULL, child, position);
     }
     
-    // Attach segment to data space
-    if((water = shmat(shmid, NULL, 0)) == (char *) -1) {
-        perror("shmat");
-        exit(1);
-    } else {
-        //printf("Pellet attached segment to data space %p\n", water);
-    }
-    
-    int xpos, ypos;
-    xpos = rand() % 10;
-    ypos = rand() % 10;
-    while(1) {
-        (*water)[ypos][xpos] = 'o';
-        sleep(1);
-        ypos++;
-        (*water)[ypos-1][xpos] = '~';
-        if(ypos == 10) break;
-    }
-    
+    shmdt(water);
     printf("Pellet done\n");
     exit(0);
+}
+
+static void *child(int *position) {
+    bool eaten = false;
+    int xpos = *position;
+    int ypos = *(position+1);
+    while(1) {
+        if(ypos == rows)
+            break;
+        else if((*water)[ypos][xpos] == '^') {
+            eaten = true;
+            break;
+        } else
+            (*water)[ypos][xpos] = 'o';
+        
+        sleep(1);
+        ypos++;
+        
+        if((*water)[ypos-1][xpos] != '^')
+            (*water)[ypos-1][xpos] = '~';
+    }
+    printf("Pellet %d left stream at column %d\n", pthread_self(), (xpos+1));
+    printf("Pellet %d eaten status: %d\n", pthread_self(), eaten);
 }
