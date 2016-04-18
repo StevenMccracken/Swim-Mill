@@ -11,9 +11,22 @@
 int scanRow(int, int);
 int currentLocation = rows/2;
 
+void catch(int signal) {
+    
+}
+
 int main() {
+    sigset_t mill_mask;
+    sigfillset(&mill_mask);
+    sigdelset(&mill_mask, SIGUSR2);
+    signal(SIGUSR2, catch);
+    
     attachSharedMemory();
+    //sigsuspend(&mill_mask);
+    printf("Fish started\n");
+    
     while(1) {
+        printf("Checking for pellets\n");
         // Locate
         int pelletLocations[rows];
         for(int i = 0; i < rows; i++) {
@@ -45,7 +58,10 @@ int main() {
                 }*/
             }
         }
-        sleep(1);
+        
+        kill(getppid(), SIGUSR1);
+        printf("Fish waiting for mill\n");
+        sigsuspend(&mill_mask);
     }
     
     shmdt(water);
