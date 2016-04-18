@@ -22,7 +22,6 @@ int main() {
     signal(SIGUSR2, catch);
     
     attachSharedMemory();
-    //sigsuspend(&mill_mask);
     printf("Fish started\n");
     
     while(1) {
@@ -58,7 +57,7 @@ int main() {
                 }*/
             }
         }
-        
+        //sleep(1);
         kill(getppid(), SIGUSR1);
         printf("Fish waiting for mill\n");
         sigsuspend(&mill_mask);

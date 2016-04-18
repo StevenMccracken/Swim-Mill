@@ -54,7 +54,7 @@ int main() {
                 sleep(1);
                 printf("%d seconds passed\n", (seconds+1));
                 kill(fish, SIGUSR2);
-                kill(pellet, SIGUSR2);
+                //kill(pellet, SIGUSR2);
             }
             
             kill(fish, SIGKILL);

@@ -23,7 +23,7 @@ int main() {
     attachSharedMemory();
     printf("Pellet started\n");
     
-    for(int i = 0; i < 2; i++) {
+    for(int i = 0; i < 20; i++) {
         // Sleeps for random interval between 1 and 2 seconds
         int sleepTime = rand() % 2 + 1;
         sleep(sleepTime);
@@ -46,11 +46,11 @@ int main() {
 
 static void *child(int *position) {
     sigset_t mill_mask;
-    sigfillset(&mill_mask);
-    sigdelset(&mill_mask, SIGUSR2);
-    signal(SIGUSR2, catch);
+    //sigfillset(&mill_mask);
+    //sigdelset(&mill_mask, SIGUSR2);
+    //signal(SIGUSR2, catch);
     
-    printf("Pellet %d started\n", pthread_self());
+    //printf("Pellet %d started\n", pthread_self());
     bool eaten = false;
     int xpos = *position;
     int ypos = *(position+1);
@@ -69,8 +69,8 @@ static void *child(int *position) {
         if((*water)[ypos-1][xpos] != '^')
             (*water)[ypos-1][xpos] = '~';
         
-        printf("Pellet %d waiting for mill\n", pthread_self());
-        sigsuspend(&mill_mask);
+        //printf("Pellet %d waiting for mill\n", pthread_self());
+        //sigsuspend(&mill_mask);
     }
     printf("Pellet %d left stream at column %d\n", pthread_self(), (xpos+1));
     printf("Pellet %d eaten status: %d\n", pthread_self(), eaten);
