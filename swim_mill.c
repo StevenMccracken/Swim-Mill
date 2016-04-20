@@ -1,3 +1,4 @@
+/* ENTER SYSTEM USERNAME SO RESULTS CAN BE WRITTEN TO FILE (line 19) */
 #include "includes.h"
 
 void catchKillSig();
@@ -57,8 +58,9 @@ void catchKillSig() {
     kill(fish, SIGINT);
     kill(pellet, SIGINT);
     
-    // Deallocate shared memory
+    // Detach & deallocate shared memory
     shmdt(water);
+    shmctl(sharedMemoryID, IPC_RMID, 0);
     
     printf("PID %d (swim mill) killed because of ^C\n", getpid());
     exit(0);
@@ -70,8 +72,9 @@ void endProgram() {
     kill(fish, SIGUSR1);
     kill(pellet, SIGUSR1);
     
-    // Deallocate shared memory
+    // Detach & deallocate shared memory
     shmdt(water);
+    shmctl(sharedMemoryID, IPC_RMID, 0);
     
     printf("PID %d (swim mill) exited because time limit reached\n", getpid());
     exit(0);
@@ -97,8 +100,6 @@ void configureWater() {
 }
 
 void createSharedMemory() {
-    int sharedMemoryID;
-    
     // Create segment
     if((sharedMemoryID = shmget(key, sizeof(water), IPC_CREAT | 0666)) < 0) {
         perror("shmget");

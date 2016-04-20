@@ -9,12 +9,11 @@
 #include <signal.h>
 
 const key_t key = 1738;
+int sharedMemoryID;
 const int rows = 10, cols = 10;
 char (*water)[rows][cols];
 
 void attachSharedMemory() {
-    int sharedMemoryID;
-    
     // Locate segment
     if((sharedMemoryID = shmget(key, sizeof(water), 0666)) < 0) {
         perror("shmget");

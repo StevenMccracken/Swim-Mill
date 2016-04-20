@@ -1,3 +1,4 @@
+/* ENTER SYSTEM USERNAME SO RESULTS CAN BE WRITTEN TO FILE (line 108) */
 #include "includes.h"
 #include <time.h>
 #include <pthread.h>
@@ -6,7 +7,7 @@ void catchKillSig();
 void catchEndSig();
 static void *child(int*);
 
-static int maxThreadsAlive = 20, totalThreads = 100;
+static int maxThreadsAlive = 20, totalThreads = 30;
 
 int main() {
     printf("PID %d (pellet) started\n", getpid());
