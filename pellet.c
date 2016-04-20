@@ -1,11 +1,3 @@
-//
-//  pellet.c
-//  
-//
-//  Created by Steven McCracken on 4/10/16.
-//
-//
-
 #include "includes.h"
 #include <time.h>
 #include <pthread.h>
@@ -19,7 +11,7 @@ static int maxThreadsAlive = 20, totalThreads = 100;
 int main() {
     printf("PID %d (pellet) started\n", getpid());
     
-    // Setup catch for termination from swim_mill
+    // Setup signal intercepts from swim_mill
     signal(SIGINT, catchKillSig);
     signal(SIGUSR1, catchEndSig);
     
@@ -34,7 +26,8 @@ int main() {
         int sleepTime = rand() % 2 + 1;
         sleep(sleepTime);
         
-        // Generate random position in stream where another pellet doesn't currently exist
+        /* Generate random position in stream where
+         another pellet doesn't currently exist */
         int xPos, yPos;
         do {
             xPos = rand()%8+1;
@@ -56,10 +49,10 @@ int main() {
         int position[2] = {xPos, yPos};
         pthread_create(&threads[i], NULL, child, position);
     }
-    //pthread_join(threads[totalThreads-1]);
+    pthread_join(threads[totalThreads-1], NULL);
     
     shmdt(water);
-    printf("PID %d (pellet) exited because of last thread died\n", getpid());
+    printf("PID %d (pellet) exited because last thread died\n", getpid());
     exit(0);
 }
 
@@ -71,7 +64,7 @@ void catchKillSig() {
 
 void catchEndSig() {
     shmdt(water);
-    printf("PID %d (pellet) killed because time limit expired\n", getpid());
+    printf("PID %d (pellet) killed because time limit reached\n", getpid());
     exit(0);
 }
 
@@ -95,7 +88,7 @@ static void *child(int *position) {
         else if((*water)[ypos][xpos] == '^')
             eaten = true;
         
-        // Overwrite previous position with water
+        // Overwrite previous position with water symbol
         if((*water)[ypos-1][xpos] != '^')
             (*water)[ypos-1][xpos] = '~';
         

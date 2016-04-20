@@ -1,11 +1,3 @@
-//
-//  swim_mill.c
-//  
-//
-//  Created by Steven McCracken on 4/10/16.
-//
-//
-
 #include "includes.h"
 
 void catchKillSig();
@@ -69,15 +61,15 @@ void endProgram() {
     // Save results from swim mill
     writeResults();
     
-    // Kill child processes because time limit has expired
-    printf("%d second time limit expired!\n", timeLimit);
+    // Kill child processes because time limit has reached
+    printf("%d second time limit reached!\n", timeLimit);
     kill(fish, SIGUSR1);
     kill(pellet, SIGUSR1);
     
     // Deallocate shared memory
     shmdt(water);
     
-    printf("PID %d (swim mill) exited because time limit expired\n", getpid());
+    printf("PID %d (swim mill) exited because time limit reached\n", getpid());
     exit(0);
 }
 
@@ -119,12 +111,14 @@ void createSharedMemory() {
 }
 
 void writeResults() {
+    // Create file on desktop
     FILE *fp;
     fp = fopen("/Users/stevenmccracken/Desktop/results.txt", "w+");
     if(fp == NULL) {
         printf("PID %d (swim mill) exited because of failure to write results\n", getpid());
         exit(1);
     } else {
+        // Write all characters in shared memory array to file
         for(int i = 0; i < rows; i++) {
             for(int j = 0; j < cols; j++) {
                 char waterChar = (*water)[i][j];

@@ -1,11 +1,3 @@
-//
-//  includes.h
-//  
-//
-//  Created by Steven McCracken on 4/14/16.
-//
-//
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

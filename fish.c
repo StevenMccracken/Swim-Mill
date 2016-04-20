@@ -1,16 +1,9 @@
-//
-//  fish.c
-//  
-//
-//  Created by Steven McCracken on 4/9/16.
-//
-//
-
 #include "includes.h"
 
 void catchKillSig();
 void catchEndSig();
-int scanRow(int,int);
+void move(int);
+int* locatePellets(int);
 
 int currentLocation = rows/2;
 
@@ -25,39 +18,55 @@ int main() {
     attachSharedMemory();
     
     while(1) {
-        // Locate all pellets
-        int pelletLocations[rows];
-        for(int i = 0; i < rows; i++)
-            pelletLocations[i] = scanRow(i, currentLocation);
+        bool moveTowardsCenter = false;
         
-        // Determine which way to move towards closest pellet
-        for(int i = 0; i < rows; i++) {
-            if(pelletLocations[i] != -1) {
-                int xDistance = currentLocation - pelletLocations[i];
-                if(xDistance != 0) {
-                    int move = 1;
-                    if(xDistance > 0)
-                        move = -1;
+        // Start from bottom and go to top, checking all rows for pellets
+        for(int row = (rows-2); row >= 0; row--) {
+            // Locate any pellets on the current row
+            int* pelletLocations = locatePellets(row);
+            
+            /* If there is a pellet directly above the fish, don't move
+             and don't check any other rows so the fish can eat it */
+            if(row == (rows-2) && *(pelletLocations+currentLocation) == 1) {
+                sleep(1);
+                break;
+            } else { // Else, there isn't a pellet directly above the fish
+                int closestPellet = -1;
+                
+                /* Find the closest pellet in the row if the fish can
+                 even reach that space by the time the pellet falls out*/
+                for(int col = 0; col < cols; col++) {
+                    if(*(pelletLocations+col) == 1) {
+                        closestPellet = col;
+                        break;
+                    }
+                }
+                
+                // If there is a pellet in the row that the fish can reach
+                if(closestPellet != -1) {
                     
-                    (*water)[9][currentLocation] = '~';
-                    currentLocation += move;
-                    (*water)[9][currentLocation] = '^';
-                }
-                /*bool right = false;
-                 if(xDistance < 0) {
-                    xDistance *= -1;
-                    right = true;
-                }
-                if(xDistance <= (9-i)) {
-                    int move = -1;
-                    if(right) move = 1;
-                    moveFish(currentLocation, move, water);
-                    currentLocation++;
-                    break;
-                }*/
+                    /* Move left or right depending on where the
+                     pellet is in relation to the fish */
+                    if(closestPellet > currentLocation)
+                        move(1);
+                    else
+                        move(-1);
+                    
+                    sleep(1);
+                    break; // Stop checking higher rows and start check over again
+                } else if(row == 0)
+                    moveTowardsCenter = true;
             }
         }
-        sleep(1);
+        
+        /* If the check for pellets reached the highest row
+         and no pellets were reachable */
+        if(moveTowardsCenter) {
+            if(currentLocation > cols/2)
+                move(-1);
+            else
+                move(1);
+        }
     }
 }
 
@@ -69,30 +78,47 @@ void catchKillSig() {
 
 void catchEndSig() {
     shmdt(water);
-    printf("PID %d (fish) killed because time limit expired\n", getpid());
+    printf("PID %d (fish) killed because time limit reached\n", getpid());
     exit(0);
 }
 
-int scanRow(int currentRow, int fish_x) {
-    /*int minCol, maxCol;
-     if(fish_x == 0) {
-     minCol = 0;
-     maxCol = minCol + currentRow;
-     } else if(fish_x == rows-1) {
-     maxCol = cols-1;
-     minCol = maxCol - currentRow;
-     } else {
-     minCol = fish_x - currentRow;
-     maxCol = fish_x + currentRow;
-     }
-     
-     for(int col = minCol; col <= maxCol; col++) {
-     if(arr[currentRow][col] == 'o')
-     return col;
-     }*/
-    for(int col = 0; col < cols; col++) {
-        if((*water)[currentRow][col] == 'o')
-            return col;
+void move(int direction) {
+    (*water)[9][currentLocation] = '~';
+    currentLocation += direction;
+    (*water)[9][currentLocation] = '^';
+}
+
+int* locatePellets(int currentRow) {
+    int pelletLocations[10] = {0};
+    int range, start, end;
+    
+    /* For a given row, the fish can only reach +/-
+     ((totalRows - 1) - currentRow) spaces away from it */
+    range = ((rows - 1) - currentRow);
+    
+    /* If the range to the left of the fish is out
+     out of bounds, just set the min left range to 0 */
+    start = currentLocation - range;
+    if(start < 0) start = 0;
+    
+    /* If the range to the right of the fish is out
+     out of bounds, just set the min left range to last col */
+    end = currentLocation + range;
+    if(end >= cols) end = (cols - 1);
+    
+    // Start from min reachable range (left) from fish
+    for(int i = start; i < currentLocation; i++) {
+        if((*water)[currentRow][i] == 'o')
+            pelletLocations[i] = 1;
     }
-    return -1;
+    
+    // Start from fish position to max range (right)
+    for(int i = currentLocation; i <= end; i++) {
+        if((*water)[currentRow][i] == 'o')
+            pelletLocations[i] = 1;
+    }
+    
+    /* Array will be all 0's, except where a pellet exists
+     and the fish can reach it, then that index will be a 1 */
+    return pelletLocations;
 }
