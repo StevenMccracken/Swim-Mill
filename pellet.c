@@ -12,18 +12,23 @@
 
 void endPellet();
 static void *child(int*);
+
 static int maxThreadsAlive = 20, totalThreads = 100;
 
 int main() {
+    // Setup catch for termination from swim_mill
     signal(SIGINT, endPellet);
-    srand(time(NULL));
-    pthread_t threads[totalThreads];
     
+    // Attach process to shared memory
     attachSharedMemory();
+    
+    srand(time(NULL)); // Generate random seed
+    pthread_t threads[totalThreads]; // Allocate pellet threads
+    
     printf("Pellet process %d started\n", getpid());
     
     for(int i = 0; i < totalThreads; i++) {
-        // Sleeps for random interval between 1 and 2 seconds
+        // Sleep for random interval between 1 and 2 seconds
         int sleepTime = rand() % 2 + 1;
         sleep(sleepTime);
         
@@ -49,7 +54,6 @@ int main() {
         int position[2] = {xPos, yPos};
         pthread_create(&threads[i], NULL, child, position);
     }
-    
     endPellet();
 }
 
@@ -65,7 +69,6 @@ static void *child(int *position) {
     int ypos = *(position+1);
     bool eaten = false, leftStream = false;
     
-    // "Drop" pellet into water
     printf("Pellet %d was dropped at [%d,%d]\n", pthread_self(), ypos, xpos);
     while(1) {
         (*water)[ypos][xpos] = 'o';
@@ -74,11 +77,13 @@ static void *child(int *position) {
         sleep(1);
         ypos++;
         
+        // Check if pellet was eaten or left stream
         if(ypos == rows)
             leftStream = true;
         else if((*water)[ypos][xpos] == '^')
             eaten = true;
         
+        // Overwrite previous position with water
         if((*water)[ypos-1][xpos] != '^')
             (*water)[ypos-1][xpos] = '~';
         

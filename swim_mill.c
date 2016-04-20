@@ -8,26 +8,23 @@
 
 #include "includes.h"
 
+void endProgram();
 void printWater();
 void configureWater();
 void createSharedMemory();
+
 const int timeLimit = 30;
 pid_t fish, pellet;
 
-void endProgram();
-void catchFish(int signal) {}
-
 int main() {
-    // Setup signal to catch signals from fish
-    sigset_t fish_mask;
-    sigfillset(&fish_mask);
-    sigdelset(&fish_mask, SIGUSR1);
-    signal(SIGUSR1, catchFish);
+    // Setup catch for ^C
     signal(SIGINT, endProgram);
     
+    // Create water in shared memory
     createSharedMemory();
     configureWater();
     
+    // Start child processes
     if((fish = fork()) == 0) {
         static char *argv[] = {"","",NULL};
         execv("/Users/stevenmccracken/Documents/GitHub/School/Swim-Mill/fish", argv);
@@ -39,18 +36,10 @@ int main() {
             printf("Swim mill started\n");
             // Run fish and pellet processes for timeLimit seconds
             for(int seconds = 0; seconds < timeLimit; seconds++) {
-                // Wait until fish sends signal that it has moved
-                //sigsuspend(&fish_mask);
-                
-                // Print water stream
-                printWater();
                 sleep(1);
-                printf("%d seconds passed\n", (seconds+1));
-                
-                // Alert fish process that water has been printed
-                //kill(fish, SIGUSR2);
+                printWater();
+                //printf("%d seconds passed\n", (seconds+1));
             }
-            
             endProgram();
         }
     }
@@ -58,10 +47,14 @@ int main() {
 }
 
 void endProgram() {
+    // Intercept ^C and kill child processe
     kill(fish, SIGINT);
     kill(pellet, SIGINT);
+    
+    // Detach shared memory
     shmdt(water);
-    printf("Swim_mill done\n");
+    
+    printf("Swim_mill process %d done\n", getpid());
     exit(0);
 }
 

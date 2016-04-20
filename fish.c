@@ -9,20 +9,17 @@
 #include "includes.h"
 
 void endFish();
-int scanRow(int, int);
+int scanRow(int,int);
+
 int currentLocation = rows/2;
 
-void catch(int signal) {}
-
 int main() {
-    sigset_t mill_mask;
-    sigfillset(&mill_mask);
-    sigdelset(&mill_mask, SIGUSR2);
-    signal(SIGUSR2, catch);
+    // Setup catch for termination from swim_mill
     signal(SIGINT, endFish);
     
+    // Attach process to shared memory
     attachSharedMemory();
-    printf("Fish %d started\n", getpid());
+    printf("Fish process %d started\n", getpid());
     
     while(1) {
         // Locate all pellets
@@ -57,19 +54,9 @@ int main() {
                 }*/
             }
         }
-        
-        /*
-        // Alert swim mill that fish has moved
-        kill(getppid(), SIGUSR1);
-        // Wait for swim mill to send signal back that it has printed the water
-        sigsuspend(&mill_mask);
-         */
         sleep(1);
     }
-    
-    shmdt(water);
-    printf("Fish done\n");
-    exit(0);
+    endFish();
 }
 
 void endFish() {
