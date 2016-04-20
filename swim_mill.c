@@ -50,9 +50,11 @@ int main() {
 }
 
 void catchKillSig() {
+    // Save results from swim mill
     writeResults();
-    // Intercept ^C and kill child processes
-    printf("\nSwim mill received ^C signal\n");
+    
+    // Kill child processes because user entered ^C
+    printf("Swim mill received ^C signal\n");
     kill(fish, SIGINT);
     kill(pellet, SIGINT);
     
@@ -64,12 +66,14 @@ void catchKillSig() {
 }
 
 void endProgram() {
+    // Save results from swim mill
+    writeResults();
+    
     // Kill child processes because time limit has expired
     printf("%d second time limit expired!\n", timeLimit);
     kill(fish, SIGUSR1);
     kill(pellet, SIGUSR1);
     
-    writeResults();
     // Deallocate shared memory
     shmdt(water);
     
@@ -118,16 +122,16 @@ void writeResults() {
     FILE *fp;
     fp = fopen("/Users/stevenmccracken/Desktop/results.txt", "w+");
     if(fp == NULL) {
-        printf("Failed to write results\n");
+        printf("PID %d (swim mill) exited because of failure to write results\n", getpid());
         exit(1);
-    }
-    
-    for(int i = 0; i < rows; i++) {
-        for(int j = 0; j < cols; j++) {
-            char waterChar = (*water)[i][j];
-            fprintf(fp, "%c", waterChar);
+    } else {
+        for(int i = 0; i < rows; i++) {
+            for(int j = 0; j < cols; j++) {
+                char waterChar = (*water)[i][j];
+                fprintf(fp, "%c", waterChar);
+            }
+            fprintf(fp, "\n");
         }
-        fprintf(fp, "\n");
+        fclose(fp);
     }
-    fclose(fp);
 }
