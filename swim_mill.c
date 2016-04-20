@@ -1,4 +1,4 @@
-/* ENTER SYSTEM USERNAME SO RESULTS CAN BE WRITTEN TO FILE (line 19) */
+/* ENTER SYSTEM USERNAME SO RESULTS CAN BE WRITTEN TO FILE (line 18) */
 #include "includes.h"
 
 void catchKillSig();
@@ -42,7 +42,7 @@ int main() {
         } else {
             // Run fish and pellet processes for timeLimit seconds
             for(int seconds = timeLimit; seconds >= 0; seconds--) {
-                printf("%d seconds remaining\n", seconds);
+                //printf("%d seconds remaining\n", seconds);
                 sleep(1);
                 printWater();
             }
@@ -104,13 +104,11 @@ void createSharedMemory() {
     if((sharedMemoryID = shmget(key, sizeof(water), IPC_CREAT | 0666)) < 0) {
         perror("shmget");
         exit(1);
-    } else;
-        //printf("Segment %d created\n", shmid);
+    }
     
     // Attach segment to data space
     if((water = shmat(sharedMemoryID, NULL, 0)) == (char *)-1) {
         perror("shmat");
         exit(1);
-    } else;
-        //printf("Attached segment to data space %p\n", water);
+    }
 }
