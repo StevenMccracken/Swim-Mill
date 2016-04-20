@@ -1,0 +1,183 @@
+dhcp-39-11-18:Swim-Mill stevenmccracken$ ./swim_mill
+PID 32811 (swim mill) started
+30 seconds remaining
+PID 32813 (pellet) started
+PID 32812 (fish) started
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~~~~~~~
+
+29 seconds remaining
+Pellet 528384 was dropped at [7,4]
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~o~~~~~
+~~~~~~~~~~
+~~~~~^~~~~
+
+28 seconds remaining
+Pellet 1064960 was dropped at [1,5]
+~~~~~~~~~~
+~~~~~o~~~~
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~o~~~~~
+~~~~^~~~~~
+
+27 seconds remaining
+Pellet 528384 was eaten at column 4!
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~~o~~~~
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~~~~~~~
+Pellet 1601536 was dropped at [5,5]
+~~~~~~~~~~
+~~~~^~~~~~
+
+26 seconds remaining
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~~~~~~~
+Pellet 2138112 was dropped at [1,4]
+~~~~~o~~~~
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~~o~~~~
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~~^~~~~
+
+25 seconds remaining
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~o~~~~~
+~~~~~~~~~~
+~~~~~o~~~~
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~~o~~~~
+~~~~~~~~~~
+Pellet 2674688 was dropped at [7,1]
+~~~~^~~~~~
+
+24 seconds remaining
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~o~~~~~
+~~~~~~~~~~
+~~~~~o~~~~
+~~~~~~~~~~
+~~~~~~~~~~
+~o~~~o~~~~
+~~~~~^~~~~
+
+23 seconds remaining
+Pellet 3211264 was dropped at [6,7]
+Pellet 1601536 was eaten at column 5!
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~o~~~~~
+~~~~~~~~~~
+Pellet 3747840 was dropped at [3,2]
+~~~~~o~~~~
+~~~~~~~o~~
+~~~~~~~~~~
+~o~~~^~~~~
+
+22 seconds remaining
+~~~~~~~~~~
+~~~~~~~~~~
+Pellet 2674688 wasn't eaten and left stream at column 1
+~~~~~~~~~~
+~~~~~~~~~~
+~~o~~~~~~~
+~~~~o~~~~~
+~~~~~~~~~~
+~~~~~o~~~~
+Pellet 4284416 was dropped at [1,5]
+~~~~~~~o~~
+~~~~~~^~~~
+
+21 seconds remaining
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~~o~~~~
+~~~~~~~~~~
+~~~~~~~~~~
+~~o~~~~~~~
+~~~~o~~~~~
+~~~~~~~~~~
+Pellet 4820992 was dropped at [4,8]
+~~~~~o~~~~
+~~~~~^~o~~
+
+20 seconds remaining
+Pellet 1064960 was eaten at column 5!
+~~~~~~~~~~
+~~~~~~~~~~
+Pellet 3211264 wasn't eaten and left stream at column 7
+~~~~~~~~~~
+~~~~~o~~~~
+~~~~~~~~~~
+~~~~~~~~o~
+~~o~~~~~~~
+~~~~o~~~~~
+~~~~~~~~~~
+~~~~^~~~~~
+
+19 seconds remaining
+Pellet 5357568 was dropped at [6,7]
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~~o~~~~
+~~~~~~~~~~
+~~~~~~~oo~
+~~o~~~~~~~
+~~~~o~~~~~
+~~~^~~~~~~
+
+18 seconds remaining
+Pellet 2138112 was eaten at column 4!
+Pellet 5894144 was dropped at [5,6]
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~~~~~~~
+~~~~~oo~~~
+~~~~~~~~~~
+~~~~~~~oo~
+~~o~~~~~~~
+~~~~^~~~~~
+
+17 seconds remaining
+^CPID 32812 (fish) killed because of ^C
+Swim mill received ^C signal
+PID 32811 (swim mill) killed because of ^C
+PID 32813 (pellet) killed because of ^C
+dhcp-39-11-18:Swim-Mill stevenmccracken$ 
