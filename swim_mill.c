@@ -13,6 +13,7 @@ void endProgram();
 void printWater();
 void configureWater();
 void createSharedMemory();
+void writeResults();
 
 const int timeLimit = 30;
 pid_t fish, pellet;
@@ -49,6 +50,7 @@ int main() {
 }
 
 void catchKillSig() {
+    writeResults();
     // Intercept ^C and kill child processes
     printf("\nSwim mill received ^C signal\n");
     kill(fish, SIGINT);
@@ -67,6 +69,7 @@ void endProgram() {
     kill(fish, SIGUSR1);
     kill(pellet, SIGUSR1);
     
+    writeResults();
     // Deallocate shared memory
     shmdt(water);
     
@@ -109,4 +112,22 @@ void createSharedMemory() {
         exit(1);
     } else;
         //printf("Attached segment to data space %p\n", water);
+}
+
+void writeResults() {
+    FILE *fp;
+    fp = fopen("/Users/stevenmccracken/Desktop/results.txt", "w+");
+    if(fp == NULL) {
+        printf("Failed to write results\n");
+        exit(1);
+    }
+    
+    for(int i = 0; i < rows; i++) {
+        for(int j = 0; j < cols; j++) {
+            char waterChar = (*water)[i][j];
+            fprintf(fp, "%c", waterChar);
+        }
+        fprintf(fp, "\n");
+    }
+    fclose(fp);
 }
