@@ -8,29 +8,29 @@
 
 #include "includes.h"
 
+void endFish();
 int scanRow(int, int);
 int currentLocation = rows/2;
 
-void catch(int signal) {
-    
-}
+void catch(int signal) {}
 
 int main() {
     sigset_t mill_mask;
     sigfillset(&mill_mask);
     sigdelset(&mill_mask, SIGUSR2);
     signal(SIGUSR2, catch);
+    signal(SIGINT, endFish);
     
     attachSharedMemory();
-    printf("Fish started\n");
+    printf("Fish %d started\n", getpid());
     
     while(1) {
-        printf("Checking for pellets\n");
-        // Locate
+        // Locate all pellets
         int pelletLocations[rows];
-        for(int i = 0; i < rows; i++) {
+        for(int i = 0; i < rows; i++)
             pelletLocations[i] = scanRow(i, currentLocation);
-        }
+        
+        // Determine which way to move towards closest pellet
         for(int i = 0; i < rows; i++) {
             if(pelletLocations[i] != -1) {
                 int xDistance = currentLocation - pelletLocations[i];
@@ -57,14 +57,24 @@ int main() {
                 }*/
             }
         }
-        //sleep(1);
+        
+        /*
+        // Alert swim mill that fish has moved
         kill(getppid(), SIGUSR1);
-        printf("Fish waiting for mill\n");
+        // Wait for swim mill to send signal back that it has printed the water
         sigsuspend(&mill_mask);
+         */
+        sleep(1);
     }
     
     shmdt(water);
     printf("Fish done\n");
+    exit(0);
+}
+
+void endFish() {
+    shmdt(water);
+    printf("Fish process %d done\n", getpid());
     exit(0);
 }
 

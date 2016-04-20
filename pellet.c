@@ -10,24 +10,24 @@
 #include <time.h>
 #include <pthread.h>
 
+void endPellet();
 static void *child(int*);
-
-void catch(int signal) {
-    
-}
+static int maxThreadsAlive = 20, totalThreads = 100;
 
 int main() {
+    signal(SIGINT, endPellet);
     srand(time(NULL));
-    pthread_t threads[30];
+    pthread_t threads[totalThreads];
     
     attachSharedMemory();
-    printf("Pellet started\n");
+    printf("Pellet process %d started\n", getpid());
     
-    for(int i = 0; i < 20; i++) {
+    for(int i = 0; i < totalThreads; i++) {
         // Sleeps for random interval between 1 and 2 seconds
         int sleepTime = rand() % 2 + 1;
         sleep(sleepTime);
         
+        // Generate random position in stream where another pellet doesn't currently exist
         int xPos, yPos;
         do {
             xPos = rand()%8+1;
@@ -35,43 +35,59 @@ int main() {
         }
         while((*water)[xPos][yPos] == 'o');
         
+        // Do nothing while maxThreadsAlive threads exist
+        int aliveThreads;
+        do {
+            aliveThreads = 0;
+            for(int j = 0; j < totalThreads; j++) {
+                if(pthread_kill(threads[j], 0) == 0)
+                    aliveThreads++;
+            }
+        } while(aliveThreads > maxThreadsAlive);
+        
+        // Spawn new pellet thread
         int position[2] = {xPos, yPos};
         pthread_create(&threads[i], NULL, child, position);
     }
     
+    endPellet();
+}
+
+void endPellet() {
     shmdt(water);
-    printf("Pellet done\n");
+    printf("Pellet process %d done\n", getpid());
     exit(0);
 }
 
 static void *child(int *position) {
-    sigset_t mill_mask;
-    //sigfillset(&mill_mask);
-    //sigdelset(&mill_mask, SIGUSR2);
-    //signal(SIGUSR2, catch);
-    
-    //printf("Pellet %d started\n", pthread_self());
-    bool eaten = false;
+    // Obtain positions from args passed in when child thread starts
     int xpos = *position;
     int ypos = *(position+1);
+    bool eaten = false, leftStream = false;
+    
+    // "Drop" pellet into water
+    printf("Pellet %d was dropped at [%d,%d]\n", pthread_self(), ypos, xpos);
     while(1) {
-        if(ypos == rows)
-            break;
-        else if((*water)[ypos][xpos] == '^') {
-            eaten = true;
-            break;
-        } else
-            (*water)[ypos][xpos] = 'o';
+        (*water)[ypos][xpos] = 'o';
         
+        // Advance pellet downwards in stream
         sleep(1);
         ypos++;
+        
+        if(ypos == rows)
+            leftStream = true;
+        else if((*water)[ypos][xpos] == '^')
+            eaten = true;
         
         if((*water)[ypos-1][xpos] != '^')
             (*water)[ypos-1][xpos] = '~';
         
-        //printf("Pellet %d waiting for mill\n", pthread_self());
-        //sigsuspend(&mill_mask);
+        if(eaten || leftStream)
+            break;
     }
-    printf("Pellet %d left stream at column %d\n", pthread_self(), (xpos+1));
-    printf("Pellet %d eaten status: %d\n", pthread_self(), eaten);
+    
+    if(eaten)
+        printf("Pellet %d was eaten at column %d!\n", pthread_self(), xpos);
+    else
+        printf("Pellet %d wasn't eaten and left stream at column %d\n", pthread_self(), xpos);
 }

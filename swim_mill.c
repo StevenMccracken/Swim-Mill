@@ -12,27 +12,18 @@ void printWater();
 void configureWater();
 void createSharedMemory();
 const int timeLimit = 30;
+pid_t fish, pellet;
 
-void catchFish(int signal) {
-    
-}
-
-void catchPellet(int signal) {
-    
-}
+void endProgram();
+void catchFish(int signal) {}
 
 int main() {
-    sigset_t fish_mask, pellet_mask;
+    // Setup signal to catch signals from fish
+    sigset_t fish_mask;
     sigfillset(&fish_mask);
-    sigfillset(&pellet_mask);
-    
     sigdelset(&fish_mask, SIGUSR1);
-    sigdelset(&pellet_mask, SIGUSR2);
-    
     signal(SIGUSR1, catchFish);
-    signal(SIGUSR2, catchPellet);
-    
-    pid_t fish, pellet;
+    signal(SIGINT, endProgram);
     
     createSharedMemory();
     configureWater();
@@ -48,22 +39,30 @@ int main() {
             printf("Swim mill started\n");
             // Run fish and pellet processes for timeLimit seconds
             for(int seconds = 0; seconds < timeLimit; seconds++) {
-                sigsuspend(&fish_mask);
+                // Wait until fish sends signal that it has moved
+                //sigsuspend(&fish_mask);
                 
+                // Print water stream
                 printWater();
                 sleep(1);
                 printf("%d seconds passed\n", (seconds+1));
-                kill(fish, SIGUSR2);
-                //kill(pellet, SIGUSR2);
+                
+                // Alert fish process that water has been printed
+                //kill(fish, SIGUSR2);
             }
             
-            kill(fish, SIGKILL);
-            kill(pellet, SIGKILL);
-            shmdt(water);
-            printf("Swim_mill done\n");
+            endProgram();
         }
     }
     return 0;
+}
+
+void endProgram() {
+    kill(fish, SIGINT);
+    kill(pellet, SIGINT);
+    shmdt(water);
+    printf("Swim_mill done\n");
+    exit(0);
 }
 
 void printWater() {
@@ -86,19 +85,17 @@ void configureWater() {
 }
 
 void createSharedMemory() {
-    int shmid;
-    key_t key = 1738;
-    char *shm;
+    int sharedMemoryID;
     
     // Create segment
-    if((shmid = shmget(key, sizeof(water), IPC_CREAT | 0666)) < 0) {
+    if((sharedMemoryID = shmget(key, sizeof(water), IPC_CREAT | 0666)) < 0) {
         perror("shmget");
         exit(1);
     } else;
         //printf("Segment %d created\n", shmid);
     
     // Attach segment to data space
-    if((water = shmat(shmid,NULL,0)) == (char *)-1) {
+    if((water = shmat(sharedMemoryID, NULL, 0)) == (char *)-1) {
         perror("shmat");
         exit(1);
     } else;

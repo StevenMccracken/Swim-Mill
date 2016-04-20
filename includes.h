@@ -17,25 +17,25 @@
 #include <signal.h>
 
 const int rows = 10, cols = 10;
+const key_t key = 1738;
 char (*water)[rows][cols];
 
 void attachSharedMemory() {
-    int shmid;
-    key_t key = 1738;
+    int sharedMemoryID;
     
     // Locate segment
-    if((shmid = shmget(key, sizeof(water), 0666)) < 0) {
+    if((sharedMemoryID = shmget(key, sizeof(water), 0666)) < 0) {
         perror("shmget");
         exit(1);
     } else {
-        //printf("Fish located segment %d\n", shmid);
+        //printf("Process %d located segment %d\n", getpid(), shmid);
     }
     
     // Attach segment to data space
-    if((water = shmat(shmid, NULL, 0)) == (char *) -1) {
+    if((water = shmat(sharedMemoryID, NULL, 0)) == (char *) -1) {
         perror("shmat");
         exit(1);
     } else {
-        //printf("Fish attached segment to data space %p\n", water);
+        //printf("Process %d attached segment to data space %p\n", getpid(), water);
     }
 }
