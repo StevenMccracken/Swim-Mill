@@ -5,13 +5,23 @@ void endProgram();
 void printWater();
 void configureWater();
 void createSharedMemory();
-void writeResults();
 
 const int timeLimit = 30;
 pid_t fish, pellet;
 
 int main() {
     printf("PID %d (swim mill) started\n", getpid());
+    
+    // Reset results file
+    FILE *fp;
+    fp = fopen("/Users/stevenmccracken/Desktop/results.txt", "w+");
+    if(fp == NULL) {
+        printf("PID %d (swim mill) failed to reset file\n", pthread_self());
+        exit(1);
+    } else {
+        fprintf(fp, "");
+        fclose(fp);
+    }
     
     // Setup signal intercept for ^C
     signal(SIGINT, catchKillSig);
@@ -42,9 +52,6 @@ int main() {
 }
 
 void catchKillSig() {
-    // Save results from swim mill
-    writeResults();
-    
     // Kill child processes because user entered ^C
     printf("Swim mill received ^C signal\n");
     kill(fish, SIGINT);
@@ -58,9 +65,6 @@ void catchKillSig() {
 }
 
 void endProgram() {
-    // Save results from swim mill
-    writeResults();
-    
     // Kill child processes because time limit has reached
     printf("%d second time limit reached!\n", timeLimit);
     kill(fish, SIGUSR1);
@@ -108,24 +112,4 @@ void createSharedMemory() {
         exit(1);
     } else;
         //printf("Attached segment to data space %p\n", water);
-}
-
-void writeResults() {
-    // Create file on desktop
-    FILE *fp;
-    fp = fopen("/Users/stevenmccracken/Desktop/results.txt", "w+");
-    if(fp == NULL) {
-        printf("PID %d (swim mill) exited because of failure to write results\n", getpid());
-        exit(1);
-    } else {
-        // Write all characters in shared memory array to file
-        for(int i = 0; i < rows; i++) {
-            for(int j = 0; j < cols; j++) {
-                char waterChar = (*water)[i][j];
-                fprintf(fp, "%c", waterChar);
-            }
-            fprintf(fp, "\n");
-        }
-        fclose(fp);
-    }
 }

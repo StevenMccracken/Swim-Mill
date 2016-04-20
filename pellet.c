@@ -96,8 +96,23 @@ static void *child(int *position) {
             break;
     }
     
+    // Print pellet results to screen
     if(eaten)
         printf("Pellet %d was eaten at column %d!\n", pthread_self(), xpos);
     else
         printf("Pellet %d wasn't eaten and left stream at column %d\n", pthread_self(), xpos);
+    
+    // Append pellet results to file
+    FILE *fp;
+    fp = fopen("/Users/stevenmccracken/Desktop/results.txt", "a");
+    if(fp == NULL) {
+        printf("TID %d (pellet) failed to write results\n", pthread_self());
+        exit(1);
+    } else {
+        if(eaten)
+            fprintf(fp, "Pellet %d was eaten at column %d!\n", pthread_self(), xpos);
+        else
+            fprintf(fp, "Pellet %d wasn't eaten and left stream at column %d\n", pthread_self(), xpos);
+        fclose(fp);
+    }
 }
