@@ -8,18 +8,21 @@
 
 #include "includes.h"
 
-void endFish();
+void catchKillSig();
+void catchEndSig();
 int scanRow(int,int);
 
 int currentLocation = rows/2;
 
 int main() {
-    // Setup catch for termination from swim_mill
-    signal(SIGINT, endFish);
+    printf("PID %d (fish) started\n", getpid());
+    
+    // Setup catch for kill signal from swim_mill
+    signal(SIGINT, catchKillSig);
+    signal(SIGUSR1, catchEndSig);
     
     // Attach process to shared memory
     attachSharedMemory();
-    printf("Fish process %d started\n", getpid());
     
     while(1) {
         // Locate all pellets
@@ -56,12 +59,17 @@ int main() {
         }
         sleep(1);
     }
-    endFish();
 }
 
-void endFish() {
+void catchKillSig() {
     shmdt(water);
-    printf("Fish process %d done\n", getpid());
+    printf("PID %d (fish) killed because of ^C\n", getpid());
+    exit(0);
+}
+
+void catchEndSig() {
+    shmdt(water);
+    printf("PID %d (fish) killed because time limit expired\n", getpid());
     exit(0);
 }
 

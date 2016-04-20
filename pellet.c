@@ -10,22 +10,24 @@
 #include <time.h>
 #include <pthread.h>
 
-void endPellet();
+void catchKillSig();
+void catchEndSig();
 static void *child(int*);
 
 static int maxThreadsAlive = 20, totalThreads = 100;
 
 int main() {
+    printf("PID %d (pellet) started\n", getpid());
+    
     // Setup catch for termination from swim_mill
-    signal(SIGINT, endPellet);
+    signal(SIGINT, catchKillSig);
+    signal(SIGUSR1, catchEndSig);
     
     // Attach process to shared memory
     attachSharedMemory();
     
     srand(time(NULL)); // Generate random seed
     pthread_t threads[totalThreads]; // Allocate pellet threads
-    
-    printf("Pellet process %d started\n", getpid());
     
     for(int i = 0; i < totalThreads; i++) {
         // Sleep for random interval between 1 and 2 seconds
@@ -54,12 +56,22 @@ int main() {
         int position[2] = {xPos, yPos};
         pthread_create(&threads[i], NULL, child, position);
     }
-    endPellet();
+    //pthread_join(threads[totalThreads-1]);
+    
+    shmdt(water);
+    printf("PID %d (pellet) exited because of last thread died\n", getpid());
+    exit(0);
 }
 
-void endPellet() {
+void catchKillSig() {
     shmdt(water);
-    printf("Pellet process %d done\n", getpid());
+    printf("PID %d (pellet) killed because of ^C\n", getpid());
+    exit(0);
+}
+
+void catchEndSig() {
+    shmdt(water);
+    printf("PID %d (pellet) killed because time limit expired\n", getpid());
     exit(0);
 }
 

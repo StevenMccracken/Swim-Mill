@@ -8,6 +8,7 @@
 
 #include "includes.h"
 
+void catchKillSig();
 void endProgram();
 void printWater();
 void configureWater();
@@ -17,8 +18,10 @@ const int timeLimit = 30;
 pid_t fish, pellet;
 
 int main() {
-    // Setup catch for ^C
-    signal(SIGINT, endProgram);
+    printf("PID %d (swim mill) started\n", getpid());
+    
+    // Setup signal intercept for ^C
+    signal(SIGINT, catchKillSig);
     
     // Create water in shared memory
     createSharedMemory();
@@ -33,7 +36,6 @@ int main() {
             static char *argv[] = {"","",NULL};
             execv("/Users/stevenmccracken/Documents/GitHub/School/Swim-Mill/pellet", argv);
         } else {
-            printf("Swim mill started\n");
             // Run fish and pellet processes for timeLimit seconds
             for(int seconds = 0; seconds < timeLimit; seconds++) {
                 sleep(1);
@@ -46,15 +48,29 @@ int main() {
     return 0;
 }
 
-void endProgram() {
-    // Intercept ^C and kill child processe
+void catchKillSig() {
+    // Intercept ^C and kill child processes
+    printf("\nSwim mill received ^C signal\n");
     kill(fish, SIGINT);
     kill(pellet, SIGINT);
     
-    // Detach shared memory
+    // Deallocate shared memory
     shmdt(water);
     
-    printf("Swim_mill process %d done\n", getpid());
+    printf("PID %d (swim mill) killed because of ^C\n", getpid());
+    exit(0);
+}
+
+void endProgram() {
+    // Kill child processes because time limit has expired
+    printf("%d second time limit expired!\n", timeLimit);
+    kill(fish, SIGUSR1);
+    kill(pellet, SIGUSR1);
+    
+    // Deallocate shared memory
+    shmdt(water);
+    
+    printf("PID %d (swim mill) exited because time limit expired\n", getpid());
     exit(0);
 }
 
