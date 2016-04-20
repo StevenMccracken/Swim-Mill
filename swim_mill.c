@@ -41,10 +41,10 @@ int main() {
             execv("/Users/stevenmccracken/Documents/GitHub/School/Swim-Mill/pellet", argv);
         } else {
             // Run fish and pellet processes for timeLimit seconds
-            for(int seconds = 0; seconds < timeLimit; seconds++) {
+            for(int seconds = timeLimit; seconds >= 0; seconds--) {
+                printf("%d seconds remaining\n", seconds);
                 sleep(1);
                 printWater();
-                //printf("%d seconds passed\n", (seconds+1));
             }
             endProgram();
         }
